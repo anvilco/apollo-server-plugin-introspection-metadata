@@ -1,0 +1,14 @@
+{
+  "presets": [
+    [
+      // https://babeljs.io/docs/en/babel-preset-env#options
+      "@babel/preset-env",
+      {
+        "debug": true,
+        "targets": {
+          "node": "8"
+        }
+      }
+    ]
+  ]
+}

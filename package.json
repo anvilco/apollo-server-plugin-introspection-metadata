@@ -1,0 +1,30 @@
+{
+  "name": "@anvilco/apollo-server-plugin-introspection-metadata",
+  "version": "0.0.1",
+  "description": "A plugin for Apollo Server that allows for adding metadata to GraphQL Introspection Query responses.",
+  "author": "Anvil Foundry Inc. <hello@useanvil.com>",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "bugs": {
+    "url": "https://github.com/anvilco/apollo-server-plugin-introspection-metadata/issues"
+  },
+  "homepage": "https://github.com/anvilco/apollo-server-plugin-introspection-metadata#readme",
+  "main": "dist/index.js",
+  "scripts": {
+    "prepare": "yarn build",
+    "build": "./node_modules/.bin/babel src --out-dir dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anvilco/apollo-server-plugin-introspection-metadata.git"
+  },
+  "keywords": [
+    "apollo-server",
+    "apollo-server-plugin",
+    "graphql"
+  ],
+  "devDependencies": {
+    "@babel/cli": "^7.12.10",
+    "@babel/core": "^7.12.10",
+    "@babel/preset-env": "^7.12.11"
+  }
+}
