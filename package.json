@@ -10,8 +10,9 @@
   "homepage": "https://github.com/anvilco/apollo-server-plugin-introspection-metadata#readme",
   "main": "dist/index.js",
   "scripts": {
+    "build": "./node_modules/.bin/babel src --out-dir dist",
     "prepare": "yarn build",
-    "build": "./node_modules/.bin/babel src --out-dir dist"
+    "test": "yarn build && mocha --config ./test/mocha-config.js"
   },
   "repository": {
     "type": "git",
@@ -24,9 +25,26 @@
     "introspection",
     "introspection-query"
   ],
+  "engines": {
+    "node": ">=8"
+  },
+  "dependencies": {
+    "lodash.get": "^4.4.2",
+    "lodash.set": "^4.3.2"
+  },
   "devDependencies": {
     "@babel/cli": "^7.12.10",
     "@babel/core": "^7.12.10",
-    "@babel/preset-env": "^7.12.11"
+    "@babel/preset-env": "^7.12.11",
+    "@babel/register": "^7.12.10",
+    "app-module-path": "^2.2.0",
+    "bdd-lazy-var": "^2.6.0",
+    "chai": "^4.2.0",
+    "eslint": "^7.18.0",
+    "eslint-plugin-mocha": "^8.0.0",
+    "graphql": "^15.5.0",
+    "mocha": "^8.2.1",
+    "sinon": "^9.2.4",
+    "sinon-chai": "^3.5.0"
   }
 }

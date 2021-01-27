@@ -1,8 +1,11 @@
+import set from 'lodash.set'
+import get from 'lodash.get'
+
 const REGEX_INTROSPECTION_QUERY = /\b(__schema|__type)\b/
 
 // Default test function. Will look to see if it is an Introspection Query
 function defaultTestFn (context) {
-  return typeof context?.request?.query === 'string' && REGEX_INTROSPECTION_QUERY.test(context?.request?.query)
+  return typeof context?.request?.query === 'string' && REGEX_INTROSPECTION_QUERY.test(context.request.query)
 }
 
 /**
@@ -70,7 +73,7 @@ export default generateApolloPlugin
  *
  * @param  {Object} options.introspectionQueryResponse - An Introspection Query response object.
  *
- * @param  {Object} options.schemaMetadata - An object containing the metadata we'd like to augment
+ * @param  {Object} options.schemaMetadata - THIS PARAM WILL BE MUTATED - An object containing the metadata we'd like to augment
  *   any Introspection Query responses with, grouped by kind. Should be in the following structure:
  *   {
  *     "OBJECT": {
@@ -95,15 +98,16 @@ export default generateApolloPlugin
  *     }
  *   }
  *
- * @param  {String} options.metadataSourceKey - (OPTIONAL) A string path to where the metadata should
- *   be read from in your schemaMetadata structure. Defaults to 'metadata'
+ * @param  {String | Array[String]} options.metadataSourceKey - (OPTIONAL) A string path or an array
+ *   of strings to be fed to lodash.get to read the metadata from in your schemaMetadata structure at
+ *   each level. Defaults to 'metadata'
  *
- * @param  {String} options.metadataTargetKey - (OPTIONAL) A string path to where the metadata should
- *   be written to in the Introspection Query data. Defaults to 'metadata'
+ * @param  {String | Array[String]} options.metadataTargetKey - (OPTIONAL) A string path or an array
+ *   of strings to be fed to lodash.set to write the metadata to the Introspection Query at each
+ *   level. Defaults to 'metadata'
  *
  *
- * @return undefined - The function call has side-effects, but does not return anything
- *   useful. It mutates the original schemaMetadata object.
+ * @return {Object} - The mutated schemaMetadata param.
  */
 export const addMetadata = ({
   introspectionQueryResponse: response,
@@ -117,6 +121,8 @@ export const addMetadata = ({
 
   // Go through all the types in the Introspection Query response and augment them
   types.forEach((type) => augmentType({ type, schemaMetadata }))
+
+  return response
 
   /**
    * Augment a Type in the Introspection Query response
@@ -172,14 +178,15 @@ export const addMetadata = ({
       return
     }
 
+    const metaDatasForName = (metadatasForKind[name] || {})
+    const typeMetadata = get(metaDatasForName, metadataSourceKey)
     const {
-      [metadataSourceKey]: typeMetadata,
       fields: fieldsMetadata = {},
-    } = (metadatasForKind[name] || {})
+    } = metaDatasForName
 
     // Add the metadata for this Type
     if (typeMetadata) {
-      type[metadataTargetKey] = typeMetadata
+      set(type, metadataTargetKey, typeMetadata)
     }
 
     // Go through all the fields for this Type and augment them
@@ -232,14 +239,15 @@ export const addMetadata = ({
 
     args ??= []
 
+    const fieldsMetadataForName = (fieldsMetadata[name] || {})
+    const fieldMetadata = get(fieldsMetadataForName, metadataSourceKey)
     const {
-      [metadataSourceKey]: fieldMetadata,
       args: argsMetadata = {},
-    } = (fieldsMetadata[name] || {})
+    } = fieldsMetadataForName
 
     // Add metadata for this Field
     if (fieldMetadata) {
-      field[metadataTargetKey] = fieldMetadata
+      set(field, metadataTargetKey, fieldMetadata)
     }
 
     // Go through all the args for this Field and augment them
@@ -285,13 +293,12 @@ export const addMetadata = ({
     // Bail if we don't have it
     if (!name) return
 
-    const {
-      [metadataSourceKey]: argMetadata,
-    } = (argsMetadata[name] || {})
+    const argsMetadataForName = (argsMetadata[name] || {})
+    const argMetadata = get(argsMetadataForName, metadataSourceKey)
 
     // Add metadata for this Arg
     if (argMetadata) {
-      arg[metadataTargetKey] = argMetadata
+      set(arg, metadataTargetKey, argMetadata)
     }
   }
 }

@@ -16,6 +16,28 @@ yarn add @anvilco/apollo-server-plugin-introspection-metadata
 
 ## Usage
 
+
+Consider the following example GraphQL SDL:
+```graphql
+type MyType {
+  myField(
+    myArg: String
+  ): String
+}
+
+type Query {
+  myQuery(
+    myArg: String
+  ): String
+}
+
+type Mutation {
+  myMutation(
+    myArg: String
+  ): String
+}
+```
+
 When instantiating `ApolloServer`, pass the following options:
 
 ```js
