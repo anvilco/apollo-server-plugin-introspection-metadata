@@ -12,11 +12,6 @@ module.exports = {
   },
   globals: {
     expect: 'readonly',
-    should: 'readonly',
-    sinon: 'readonly',
-    mount: 'readonly',
-    render: 'readonly',
-    shallow: 'readonly',
     // *************************************************
     // bdd-lazy-var
     //
@@ -24,14 +19,7 @@ module.exports = {
     // https://github.com/stalniy/bdd-lazy-var/issues/56#issuecomment-639248242
     // eslint-disable-next-line id-length
     $: 'readonly',
-    its: 'readonly',
     def: 'readonly',
-    subject: 'readonly',
-    get: 'readonly',
-    sharedExamplesFor: 'readonly',
-    includeExamplesFor: 'readonly',
-    itBehavesLike: 'readonly',
-    is: 'readonly'
     //
     // *************************************************
   }

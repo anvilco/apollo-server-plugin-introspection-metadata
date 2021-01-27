@@ -100,10 +100,6 @@ function findArg ({ args, name = 'myArg' }) {
 }
 
 describe('src/index.js', function () {
-  afterEach(() => {
-    sinon.restore()
-  })
-
   describe('generateApolloPlugin', function() {
     def('introspectionQueryPattern', () => '__schema')
     def('otherQueryPattern', () => 'foo')
@@ -161,10 +157,6 @@ describe('src/index.js', function () {
   })
 
   describe('addMetadata', function() {
-    afterEach(() => {
-      sinon.restore()
-    })
-
     def('introspectionQueryResponse', generateIntrospectionQueryResponse)
     def('schemaMetadata', generateMetadata)
     def('params', () => ({
