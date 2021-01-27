@@ -18,11 +18,63 @@ function defaultTestFn (context) {
  *   if it's an operation for which we'd like to do something. In our case, we want to determine
  *   if it's an Introspection Query or not.
  *
+ * @param  {Object} options.introspectionQueryResponse - SEE 'addMetadata' BELOW
+ *
+ * @param  {Object} options.schemaMetadata - SEE 'addMetadata' BELOW
+ *
+ * @param  {String} options.metadataSourceKey - SEE 'addMetadata' BELOW
+ *
+ * @param  {String} options.metadataTargetKey - SEE 'addMetadata' BELOW
+ *
+ * @return {Object} - Returns an Object that conforms to the Apollo Server plugin pattern
+ *   and can be added to the plugins of an Apollo Server instance.
+ */
+export const generateApolloPlugin = ({
+  testFn = defaultTestFn,
+  schemaMetadata,
+  metadataSourceKey = 'metadata',
+  metadataTargetKey = 'metadata',
+} = {}) => {
+  return {
+    // Check at the beginning of the request whether we should do anything at all
+    requestDidStart (context) {
+      // If this request doesn't match what we're looking for (an Introspection Query), then do nothing.
+      if (!testFn(context)) {
+        return
+      }
+
+      return {
+        // Hook into the response event
+        willSendResponse (context) {
+          const {
+            response: introspectionQueryResponse,
+          } = context
+
+          addMetadata({
+            introspectionQueryResponse,
+            schemaMetadata,
+            metadataSourceKey,
+            metadataTargetKey,
+          })
+        },
+      }
+    },
+  }
+}
+export default generateApolloPlugin
+
+
+/**
+ * This function actually does the work of mutating the Introspection Query response object with the
+ * metadata provided. Can be used standalone for usecases that are not Apollo Server Plugin scenarios.
+ *
+ * @param  {Object} options.introspectionQueryResponse - An Introspection Query response object.
+ *
  * @param  {Object} options.schemaMetadata - An object containing the metadata we'd like to augment
  *   any Introspection Query responses with, grouped by kind. Should be in the following structure:
  *   {
  *     "OBJECT": {
- *       Organization: {
+ *       SomeType: {
  *         someKeyWhereMetadataLives: {
  *           meta: "data",
  *           moreMeta: "data",
@@ -43,221 +95,203 @@ function defaultTestFn (context) {
  *     }
  *   }
  *
- * @param  {String} options.metadataKey - (OPTIONAL) A string path to where the metadata is stored in your
- *   structure. Defaults to 'metadata'
+ * @param  {String} options.metadataSourceKey - (OPTIONAL) A string path to where the metadata should
+ *   be read from in your schemaMetadata structure. Defaults to 'metadata'
  *
- * @return {Object} - Returns an Object that conforms to the Apollo Server plugin pattern
- *   and can be added to the plugins of an Apollo Server instance.
+ * @param  {String} options.metadataTargetKey - (OPTIONAL) A string path to where the metadata should
+ *   be written to in the Introspection Query data. Defaults to 'metadata'
+ *
+ *
+ * @return undefined - The function call has side-effects, but does not return anything
+ *   useful. It mutates the original schemaMetadata object.
  */
-const generateDocuSpection = ({
-  testFn = defaultTestFn,
+export const addMetadata = ({
+  introspectionQueryResponse: response,
   schemaMetadata,
-  metadataKey = 'metadata',
+  metadataSourceKey = 'metadata',
+  metadataTargetKey = 'metadata',
 } = {}) => {
-  return {
-    // Check at the beginning of the request whether we should do anything at all
-    requestDidStart (context) {
-      // If this request doesn't match what we're looking for (an Introspection Query), then do nothing.
-      if (!testFn(context)) {
-        return
-      }
+  const {
+    types = [],
+  } = (response?.data?.__schema || {})
 
-      return {
-        // Hook into the response event
-        willSendResponse (context) {
-          const {
-            response,
-          } = context
+  // Go through all the types in the Introspection Query response and augment them
+  types.forEach((type) => augmentType({ type, schemaMetadata }))
 
-          const {
-            // It's weird...GraphQL jams everything interesting in the Introspection Query response
-            // under the 'types' key
-            types = [],
-          } = (response?.data?.__schema || {})
+  /**
+   * Augment a Type in the Introspection Query response
+   *
+   * @param  {Object} options.type - The original Type from the Introspection Query response.
+   *   Example:
+   *     {
+   *       "kind": "OBJECT",
+   *       "name": "MyType",
+   *       "description": "Foo and bar and stuff",
+   *       "fields": [...],
+   *       "inputFields": null,
+   *       "interfaces": null,
+   *       "enumValues": null,
+   *       "possibleTypes": null
+   *     }
+   *
+   * @param  {Object} options.schemaMetadata - The metadata we have for any/all Types that we
+   *   want to use in the augmentations, grouped by kind.
+   *   Example:
+   *     {
+   *       "OBJECT": {
+   *         "MyType": {
+   *           "metadata": {
+   *             "foo": "bar",
+   *             "baz": "bop"
+   *           },
+   *           "fields": {...}
+   *         },
+   *         ...
+   *       },
+   *       ...
+   *     }
+   *
+   * @return undefined - The function call has side-effects, but does not return anything
+   *   useful.
+   */
+  function augmentType ({ type = {}, schemaMetadata = {} }) {
+    let {
+      name,
+      kind,
+      fields = [],
+    } = (type || {})
 
-          // Go through all the types in the Introspection Query response and augment them
-          types.forEach((type) => augmentType({ type, schemaMetadata }))
+    // Bail if we don't have it
+    if (!name) return
 
-          /**
-           * Augment a Type in the Introspection Query response
-           *
-           * @param  {Object} options.type - The original Type from the Introspection Query response.
-           *   Example:
-           *     {
-           *       "kind": "OBJECT",
-           *       "name": "Organization",
-           *       "description": "Foo and bar and stuff",
-           *       "fields": [...],
-           *       "inputFields": null,
-           *       "interfaces": null,
-           *       "enumValues": null,
-           *       "possibleTypes": null
-           *     }
-           *
-           * @param  {Object} options.schemaMetadata - The metadata we have for any/all Types that we
-           *   want to use in the augmentations, grouped by kind.
-           *   Example:
-           *     {
-           *       "OBJECT": {
-           *         "Organization": {
-           *           "metadata": {
-           *             "foo": "bar",
-           *             "baz": "bop"
-           *           },
-           *           "fields": {...}
-           *         },
-           *         ...
-           *       },
-           *       ...
-           *     }
-           *
-           * @return undefined - The function call has side-effects, but does not return anything
-           *   useful.
-           */
-          function augmentType ({ type = {}, schemaMetadata = {} }) {
-            let {
-              name,
-              kind,
-              fields = [],
-            } = (type || {})
+    fields ??= []
 
-            // Bail if we don't have it
-            if (!name) return
+    const metadatasForKind = schemaMetadata[kind] || {}
+    // Bail if we don't have it
+    if (!metadatasForKind) {
+      return
+    }
 
-            fields ??= []
+    const {
+      [metadataSourceKey]: typeMetadata,
+      fields: fieldsMetadata = {},
+    } = (metadatasForKind[name] || {})
 
-            const metadatasForKind = schemaMetadata[kind] || {}
-            // Bail if we don't have it
-            if (!metadatasForKind) {
-              return
-            }
+    // Add the metadata for this Type
+    if (typeMetadata) {
+      type[metadataTargetKey] = typeMetadata
+    }
 
-            const {
-              [metadataKey]: typeMetadata,
-              fields: fieldsMetadata = {},
-            } = (metadatasForKind[name] || {})
+    // Go through all the fields for this Type and augment them
+    fields.forEach((field) => augmentField({ field, fieldsMetadata }))
+  }
 
-            // Add the metadata for this Type
-            if (typeMetadata) {
-              type[metadataKey] = typeMetadata
-            }
+  /**
+   * Augment a Field in the Introspection Query response
+   *
+   * @param  {Object} options.field - The original Field from the Introspection Query response
+   *   Example:
+   *     {
+   *       name: "slug",
+   *       description: "foo and bar and stuff",
+   *       args: [...],
+   *       type: {
+   *         kind: "SCALAR",
+   *         name: "String",
+   *         ofType: null,
+   *       },
+   *       isDeprecated: false,
+   *       deprecatedReason: null,
+   *     }
+   *
+   * @param  {Object} options.fieldsMetadata - The metadata we have for any/all Fields for the
+   *   parent Type of the Field in question.
+   *   Example:
+   *   {
+   *     "slug": {
+   *       "metadata": {
+   *         "foo": "bar",
+   *         "baz": "bop"
+   *       },
+   *       "args": {...}
+   *     }
+   *     ...
+   *   }
+   *
+   * @return undefined - The function call has side-effects, but does not return anything
+   *   useful.
+   */
+  function augmentField ({ field = {}, fieldsMetadata = {} }) {
+    let {
+      name,
+      args = [],
+    } = (field || {})
 
-            // Go through all the fields for this Type and augment them
-            fields.forEach((field) => augmentField({ field, fieldsMetadata }))
-          }
+    // Bail if we don't have it
+    if (!name) return
 
-          /**
-           * Augment a Field in the Introspection Query response
-           *
-           * @param  {Object} options.field - The original Field from the Introspection Query response
-           *   Example:
-           *     {
-           *       name: "eid",
-           *       description: "foo and bar and stuff",
-           *       args: [...],
-           *       type: {
-           *         kind: "SCALAR",
-           *         name: "String",
-           *         ofType: null,
-           *       },
-           *       isDeprecated: false,
-           *       deprecatedReason: null,
-           *     }
-           *
-           * @param  {Object} options.fieldsMetadata - The metadata we have for any/all Fields for the
-           *   parent Type of the Field in question.
-           *   Example:
-           *   {
-           *     "eid": {
-           *       "metadata": {
-           *         "foo": "bar",
-           *         "baz": "bop"
-           *       },
-           *       "args": {...}
-           *     }
-           *     ...
-           *   }
-           *
-           * @return undefined - The function call has side-effects, but does not return anything
-           *   useful.
-           */
-          function augmentField ({ field = {}, fieldsMetadata = {} }) {
-            let {
-              name,
-              args = [],
-            } = (field || {})
+    args ??= []
 
-            // Bail if we don't have it
-            if (!name) return
+    const {
+      [metadataSourceKey]: fieldMetadata,
+      args: argsMetadata = {},
+    } = (fieldsMetadata[name] || {})
 
-            args ??= []
+    // Add metadata for this Field
+    if (fieldMetadata) {
+      field[metadataTargetKey] = fieldMetadata
+    }
 
-            const {
-              [metadataKey]: fieldMetadata,
-              args: argsMetadata = {},
-            } = (fieldsMetadata[name] || {})
+    // Go through all the args for this Field and augment them
+    args.forEach((arg) => augmentArg({ arg, argsMetadata }))
+  }
 
-            // Add metadata for this Field
-            if (fieldMetadata) {
-              field[metadataKey] = fieldMetadata
-            }
+  /**
+   * Augment an Arg in the Introspection Query response
+   *
+   * @param  {Object} options.arg - The original Arg from the Introspection Query response
+   *   Example:
+   *     {
+   *       name: "isArchived",
+   *       description: "foo and bar and stuff",
+   *       type: {
+   *         kind: "SCALAR",
+   *         name: "Boolean",
+   *         ofType: null
+   *       }
+   *       defaultValue: false
+   *     }
+   *
+   * @param  {Object} options.argsMetadata - The metadata we have for any/all Args for the
+   *   parent Field of the Arg in question.
+   *   Example:
+   *     {
+   *       isArchived: {
+   *         metadata: {
+   *           foo: "bar",
+   *           baz: "bop"
+   *         }
+   *       }
+   *     }
+   *
+   * @return undefined - The function call has side-effects, but does not return anything
+   *   useful.
+   */
+  function augmentArg ({ arg = {}, argsMetadata = {} }) {
+    const {
+      name,
+    } = arg
 
-            // Go through all the args for this Field and augment them
-            args.forEach((arg) => augmentArg({ arg, argsMetadata }))
-          }
+    // Bail if we don't have it
+    if (!name) return
 
-          /**
-           * Augment an Arg in the Introspection Query response
-           *
-           * @param  {Object} options.arg - The original Arg from the Introspection Query response
-           *   Example:
-           *     {
-           *       name: "isArchived",
-           *       description: "foo and bar and stuff",
-           *       type: {
-           *         kind: "SCALAR",
-           *         name: "Boolean",
-           *         ofType: null
-           *       }
-           *       defaultValue: false
-           *     }
-           *
-           * @param  {Object} options.argsMetadata - The metadata we have for any/all Args for the
-           *   parent Field of the Arg in question.
-           *   Example:
-           *     {
-           *       isArchived: {
-           *         metadata: {
-           *           foo: "bar",
-           *           baz: "bop"
-           *         }
-           *       }
-           *     }
-           *
-           * @return undefined - The function call has side-effects, but does not return anything
-           *   useful.
-           */
-          function augmentArg ({ arg = {}, argsMetadata = {} }) {
-            const {
-              name,
-            } = arg
+    const {
+      [metadataSourceKey]: argMetadata,
+    } = (argsMetadata[name] || {})
 
-            // Bail if we don't have it
-            if (!name) return
-
-            const {
-              [metadataKey]: argMetadata,
-            } = (argsMetadata[name] || {})
-
-            // Add metadata for this Arg
-            if (argMetadata) {
-              arg[metadataKey] = argMetadata
-            }
-          }
-        },
-      }
-    },
+    // Add metadata for this Arg
+    if (argMetadata) {
+      arg[metadataTargetKey] = argMetadata
+    }
   }
 }
-
-export default generateDocuSpection

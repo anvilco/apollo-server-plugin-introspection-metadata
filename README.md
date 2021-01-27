@@ -114,6 +114,81 @@ const apolloServer = new ApolloServer({
 });
 ```
 
+Output of the Intropection Query will the become something like this:
+
+```js
+{
+  data: {
+    __schema: {
+      //...
+      types: [
+        {
+          kind: "OBJECT"
+          name: "MyType"
+          metadata: {
+            foo: "bar",
+            baz: "bop",
+          },
+          fields: [{
+            //...
+            name: "myField",
+            // myField metadata
+            metadata: {...}
+            args: [{
+              //...
+              name: "myArg",
+              // myField's myArg metadata
+              metadata: {...}
+            }]
+          }]
+        },
+        {
+          kind: "OBJECT"
+          name: "Query"
+          fields: [{
+            //...
+            name: "myQuery",
+            // myQuery metadata
+            metadata: {...}
+            args: [{
+              //...
+              name: "myArg",
+              // myQuery's myArg metadata
+              metadata: {...}
+            }]
+          }]
+        },
+        {
+          kind: "OBJECT"
+          name: "Mutation"
+          fields: [{
+            //...
+            name: "myMutation",
+            // myMutation metadata
+            metadata: {...}
+            args: [{
+              //...
+              name: "myArg",
+              // myMutation's myArg metadata
+              metadata: {...}
+            }]
+          }]
+        },
+        //...
+      ]
+    }
+  }
+}
+```
+
+
+## API
+
+#### `generateApolloPlugin` (`default` export)
+This is what you most likely came here for. See Javadoc in [index.js](src/index.js) for more details.
+
+#### `addMetadata`
+If you're not actually using Apollo Server, or want to augment an Introspection Query response from wherever with your metadata then this function may be what you're looking for. See Javadoc in [index.js](src/index.js)
 
 ## References
 
