@@ -188,7 +188,7 @@ Output of the Intropection Query will the become something like this:
 This is what you most likely came here for. See Javadoc in [index.js](src/index.js) for more details.
 
 #### `addMetadata`
-If you're not actually using Apollo Server, or want to augment an Introspection Query response from wherever with your metadata then this function may be what you're looking for. See Javadoc in [index.js](src/index.js)
+If you're not actually using Apollo Server, or want to augment an Introspection Query response from somewhere else with your metadata, then this function may be what you're looking for. See Javadoc in [index.js](src/index.js)
 
 ## References
 

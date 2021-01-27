@@ -20,7 +20,9 @@
   "keywords": [
     "apollo-server",
     "apollo-server-plugin",
-    "graphql"
+    "graphql",
+    "introspection",
+    "introspection-query"
   ],
   "devDependencies": {
     "@babel/cli": "^7.12.10",
