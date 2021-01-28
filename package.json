@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A plugin for Apollo Server that allows for adding metadata to GraphQL Introspection Query responses.",
   "author": "Anvil Foundry Inc. <hello@useanvil.com>",
-  "license": "SEE LICENSE IN LICENSE.md",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/anvilco/apollo-server-plugin-introspection-metadata/issues"
   },

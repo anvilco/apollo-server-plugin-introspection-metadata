@@ -71,10 +71,13 @@ export default generateApolloPlugin
  * This function actually does the work of mutating the Introspection Query response object with the
  * metadata provided. Can be used standalone for usecases that are not Apollo Server Plugin scenarios.
  *
- * @param  {Object} options.introspectionQueryResponse - An Introspection Query response object.
+ * @param  {Object} options.introspectionQueryResponse - THIS PARAM WILL BE MUTATED - An Introspection
+ *   Query response object.
  *
- * @param  {Object} options.schemaMetadata - THIS PARAM WILL BE MUTATED - An object containing the metadata we'd like to augment
- *   any Introspection Query responses with, grouped by kind. Should be in the following structure:
+ * @param  {Object} options.schemaMetadata - An object containing the
+ *   metadata we'd like to augment any Introspection Query responses with, grouped by kind. Should be
+ *   in the following structure:
+ *
  *   {
  *     "OBJECT": {
  *       SomeType: {
@@ -107,7 +110,7 @@ export default generateApolloPlugin
  *   level. Defaults to 'metadata'
  *
  *
- * @return {Object} - The mutated schemaMetadata param.
+ * @return {Object} - The mutated introspectionQueryResponse param.
  */
 export const addMetadata = ({
   introspectionQueryResponse: response,
@@ -137,7 +140,8 @@ export const addMetadata = ({
    *       "inputFields": null,
    *       "interfaces": null,
    *       "enumValues": null,
-   *       "possibleTypes": null
+   *       "possibleTypes": null,
+   *       ...
    *     }
    *
    * @param  {Object} options.schemaMetadata - The metadata we have for any/all Types that we
@@ -157,8 +161,7 @@ export const addMetadata = ({
    *       ...
    *     }
    *
-   * @return undefined - The function call has side-effects, but does not return anything
-   *   useful.
+   * @return undefined - The function call has side-effects, but does not return anything.
    */
   function augmentType ({ type = {}, schemaMetadata = {} }) {
     let {
@@ -209,6 +212,7 @@ export const addMetadata = ({
    *       },
    *       isDeprecated: false,
    *       deprecatedReason: null,
+   *       ...
    *     }
    *
    * @param  {Object} options.fieldsMetadata - The metadata we have for any/all Fields for the
@@ -220,13 +224,12 @@ export const addMetadata = ({
    *         "foo": "bar",
    *         "baz": "bop"
    *       },
-   *       "args": {...}
+   *       "args": {...},
    *     }
    *     ...
    *   }
    *
-   * @return undefined - The function call has side-effects, but does not return anything
-   *   useful.
+   * @return undefined - The function call has side-effects, but does not return anything.
    */
   function augmentField ({ field = {}, fieldsMetadata = {} }) {
     let {
@@ -267,7 +270,8 @@ export const addMetadata = ({
    *         name: "Boolean",
    *         ofType: null
    *       }
-   *       defaultValue: false
+   *       defaultValue: false,
+   *       ...
    *     }
    *
    * @param  {Object} options.argsMetadata - The metadata we have for any/all Args for the
@@ -278,12 +282,11 @@ export const addMetadata = ({
    *         metadata: {
    *           foo: "bar",
    *           baz: "bop"
-   *         }
+   *         },
    *       }
    *     }
    *
-   * @return undefined - The function call has side-effects, but does not return anything
-   *   useful.
+   * @return undefined - The function call has side-effects, but does not return anything.
    */
   function augmentArg ({ arg = {}, argsMetadata = {} }) {
     const {

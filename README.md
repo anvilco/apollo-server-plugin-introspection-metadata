@@ -41,8 +41,8 @@ type Mutation {
 When instantiating `ApolloServer`, pass the following options:
 
 ```js
+import { ApolloServer } = from 'apollo-server'
 import IntrospectionMetadataPlugin from '@anvilco/apollo-server-plugin-introspection-metadata'
-//...
 
 // All keys are optional, all the way down the object.
 // Only build/include what you want to add metadata for :)
@@ -70,7 +70,7 @@ const schemaMetadataByKind = {
     },
     MyOtherType: {...},
     Query: {
-      // Queries you define end up as Fields in the Queries Type, so this
+      // Queries you've defined end up as Fields in the Queries Type, so this
       // structure follows that pattern
       fields: {
         myQuery: {
@@ -86,8 +86,8 @@ const schemaMetadataByKind = {
       }
     },
     Mutation: {
-      // Mutations you define end up as Fields in the Mutation Type, so this
-      // structure follows that pattern
+      // Mutations you've defined end up as Fields in the Mutation Type, so
+      // this structure follows that pattern
       fields: {
         myMutation: {
           // Arbitrary metadata about the myMutation Mutation
@@ -115,7 +115,7 @@ const schemaMetadataByKind = {
   ENUM: {
     ...
   }
-};
+}
 
 // If you want to only add this metadata in the Development
 // environment:
@@ -125,7 +125,7 @@ if (process.env.NODE_ENV === 'development') {
     IntrospectionMetadataPlugin({
       schemaMetadata: schemaMetadataByKind
     })
-  );
+  )
 }
 
 const apolloServer = new ApolloServer({
@@ -133,7 +133,7 @@ const apolloServer = new ApolloServer({
   introspection: true,
   plugins: apolloPlugins,
   //...
-});
+})
 ```
 
 Output of the Intropection Query will the become something like this:
