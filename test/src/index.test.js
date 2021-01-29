@@ -254,5 +254,22 @@ describe('src/index.js', function () {
         })
       })
     })
+
+    context('__schema not nested in "data" key', function () {
+      def('introspectionQueryResponse', () => {
+        return generateIntrospectionQueryResponse().data
+      })
+
+      it('adds metadata', function () {
+        const response = addMetadata($.params)
+        expect(response).to.be.ok
+        const { types } = response.__schema
+
+        const MyType = findType({ types, name: 'MyType' })
+        expect(MyType).to.be.ok
+
+        expect(MyType.metadata).to.eql(defaultMetadata)
+      })
+    })
   })
 })

@@ -72,7 +72,8 @@ export default generateApolloPlugin
  * metadata provided. Can be used standalone for usecases that are not Apollo Server Plugin scenarios.
  *
  * @param  {Object} options.introspectionQueryResponse - THIS PARAM WILL BE MUTATED - An Introspection
- *   Query response object.
+ *   Query response object. "__schema", etc, can either be wrapped in the "data" envelope, or that
+ *   envelope can have been omitted.
  *
  * @param  {Object} options.schemaMetadata - An object containing the
  *   metadata we'd like to augment any Introspection Query responses with, grouped by kind. Should be
@@ -120,7 +121,7 @@ export const addMetadata = ({
 } = {}) => {
   const {
     types = [],
-  } = (response?.data?.__schema || {})
+  } = (response?.data?.__schema || response?.__schema || {})
 
   // Go through all the types in the Introspection Query response and augment them
   types.forEach((type) => augmentType({ type, schemaMetadata }))
