@@ -1,0 +1,9 @@
+{
+  "delay": 2000,
+  "verbose": true,
+  "ext": "js,json",
+  "ignore": [
+    ".git",
+    "dist"
+  ]
+}

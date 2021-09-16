@@ -3,6 +3,19 @@ import get from 'lodash.get'
 
 const REGEX_INTROSPECTION_QUERY = /\b(__schema|__type)\b/
 
+const KIND_OBJECT = 'OBJECT'
+const KIND_INPUT_OBJECT = 'INPUT_OBJECT'
+
+const FIELDS_KEY_FIELDS = 'fields'
+const FIELDS_KEY_INPUT_FIELDS = 'inputFields'
+const FIELDS_KEY_DEFAULT = FIELDS_KEY_FIELDS
+
+const KIND_TO_FIELDS_KEY = {
+  [KIND_OBJECT]: FIELDS_KEY_FIELDS,
+  [KIND_INPUT_OBJECT]: FIELDS_KEY_INPUT_FIELDS,
+}
+
+
 // Default test function. Will look to see if it is an Introspection Query
 function defaultTestFn (context) {
   return typeof context?.request?.query === 'string' && REGEX_INTROSPECTION_QUERY.test(context.request.query)
@@ -168,13 +181,14 @@ export const addMetadata = ({
     let {
       name,
       kind,
-      fields = [],
     } = (type || {})
 
     // Bail if we don't have it
     if (!name) return
 
-    fields ??= []
+    const fieldsKey = KIND_TO_FIELDS_KEY[kind] || FIELDS_KEY_DEFAULT
+
+    const fields = type[fieldsKey] || []
 
     const metadatasForKind = schemaMetadata[kind] || {}
     // Bail if we don't have it
@@ -185,7 +199,7 @@ export const addMetadata = ({
     const metaDatasForName = (metadatasForKind[name] || {})
     const typeMetadata = get(metaDatasForName, metadataSourceKey)
     const {
-      fields: fieldsMetadata = {},
+      [fieldsKey]: fieldsMetadata = {},
     } = metaDatasForName
 
     // Add the metadata for this Type

@@ -12,7 +12,8 @@
   "scripts": {
     "build": "./node_modules/.bin/babel src --out-dir dist",
     "prepare": "yarn build",
-    "test": "yarn build && mocha --config ./test/mocha-config.js"
+    "test": "yarn build && mocha --config ./test/mocha-config.js",
+    "test:watch": "nodemon -x 'yarn test'"
   },
   "repository": {
     "type": "git",
@@ -43,6 +44,7 @@
     "eslint": "^7.18.0",
     "eslint-plugin-mocha": "^8.0.0",
     "graphql": "^15.5.0",
-    "mocha": "^8.2.1"
+    "mocha": "^8.2.1",
+    "nodemon": "^2.0.12"
   }
 }
