@@ -30,6 +30,11 @@ const schemaSDL = `
       myArg: String
     ): String
   }
+
+  input CreateUserInput {
+    name: String!
+    email: String!
+  }
 `
 
 const schema = buildSchema(schemaSDL)
@@ -83,12 +88,25 @@ function generateMetadata ({
           }
         }
       }
+    },
+    'INPUT_OBJECT': {
+      'CreateUserInput': {
+        [metadataKey]: metadata,
+        inputFields: {
+          name: {
+            [metadataKey]: metadata,
+          },
+          email: {
+            [metadataKey]: metadata,
+          }
+        }
+      }
     }
   }
 }
 
-function findType ({ types, name }) {
-  return types.find((type) => type.name === name)
+function findType ({ types, name, kind = 'OBJECT' }) {
+  return types.find((type) => type.kind === kind && type.name === name)
 }
 
 function findField ({ fields, name = 'myField' }) {
@@ -174,10 +192,12 @@ describe('src/index.js', function () {
       const MyType = findType({ types, name: 'MyType' })
       const Query = findType({ types, name: 'Query' })
       const Mutation = findType({ types, name: 'Mutation' })
+      const CreateUserInput = findType({ types, name: 'CreateUserInput', kind: 'INPUT_OBJECT' })
 
       expect(MyType).to.be.ok
       expect(Query).to.be.ok
       expect(Mutation).to.be.ok
+      expect(CreateUserInput).to.be.ok
 
       let myArg = false
 
@@ -199,6 +219,12 @@ describe('src/index.js', function () {
       expect(myMutationField.metadata).to.eql(defaultMetadata)
       myArg = findArg({ args: myMutationField.args })
       expect(myArg.metadata).to.eql(defaultMetadata)
+
+      expect(CreateUserInput.metadata).to.eql(defaultMetadata)
+      for (const inputFieldName of ['name', 'email']) {
+        const nameInputField = findField({ fields: CreateUserInput.inputFields, name: inputFieldName })
+        expect(nameInputField.metadata).to.eql(defaultMetadata)
+      }
     })
 
     describe('metadata target key overridden', function () {
