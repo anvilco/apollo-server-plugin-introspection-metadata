@@ -1,6 +1,6 @@
 {
   "name": "@anvilco/apollo-server-plugin-introspection-metadata",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "A plugin for Apollo Server that allows for adding metadata to GraphQL Introspection Query responses.",
   "author": "Anvil Foundry Inc. <hello@useanvil.com>",
   "license": "MIT",
