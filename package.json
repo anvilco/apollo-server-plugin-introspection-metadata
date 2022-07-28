@@ -13,7 +13,9 @@
     "build": "./node_modules/.bin/babel src --out-dir dist",
     "prepare": "yarn build",
     "test": "yarn build && mocha --config ./test/mocha-config.js",
-    "test:watch": "nodemon -x 'yarn test'"
+    "test:debug": "yarn test --node-option inspect=0.0.0.0:9223",
+    "test:watch": "nodemon -x 'yarn test'",
+    "test:debug:watch": "nodemon -x 'yarn test:debug'"
   },
   "repository": {
     "type": "git",

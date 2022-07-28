@@ -10,6 +10,11 @@ import generateApolloPlugin, {
 } from 'dist'
 
 
+const KIND_OBJECT = 'OBJECT'
+// const KIND_INPUT_OBJECT = 'INPUT_OBJECT'
+const KIND_ENUM = 'ENUM'
+const KIND_INTERFACE = 'INTERFACE'
+
 const defaultMetadata = { foo: 'bar' }
 
 const schemaSDL = `
@@ -34,6 +39,17 @@ const schemaSDL = `
   input CreateUserInput {
     name: String!
     email: String!
+  }
+
+  enum MyEnum {
+    ONE
+    TWO
+    THREE
+  }
+
+  interface MyInterface {
+    id: ID
+    foo: String
   }
 `
 
@@ -101,11 +117,31 @@ function generateMetadata ({
           }
         }
       }
-    }
+    },
+    'ENUM': {
+      'MyEnum': {
+        [metadataKey]: metadata,
+        enumValues: {
+          'TWO': {
+            [metadataKey]: metadata,
+          },
+        },
+      },
+    },
+    'INTERFACE': {
+      'MyInterface': {
+        [metadataKey]: metadata,
+        fields: {
+          'id': {
+            [metadataKey]: metadata,
+          },
+        }
+      }
+    },
   }
 }
 
-function findType ({ types, name, kind = 'OBJECT' }) {
+function findType ({ types, name, kind = KIND_OBJECT }) {
   return types.find((type) => type.kind === kind && type.name === name)
 }
 
@@ -193,11 +229,15 @@ describe('src/index.js', function () {
       const Query = findType({ types, name: 'Query' })
       const Mutation = findType({ types, name: 'Mutation' })
       const CreateUserInput = findType({ types, name: 'CreateUserInput', kind: 'INPUT_OBJECT' })
+      const MyEnum = findType({ types, name: 'MyEnum', kind: KIND_ENUM })
+      const MyInterface = findType({ types, name: 'MyInterface', kind: KIND_INTERFACE })
 
       expect(MyType).to.be.ok
       expect(Query).to.be.ok
       expect(Mutation).to.be.ok
       expect(CreateUserInput).to.be.ok
+      expect(MyEnum).to.be.ok
+      expect(MyInterface).to.be.ok
 
       let myArg = false
 
@@ -225,6 +265,15 @@ describe('src/index.js', function () {
         const nameInputField = findField({ fields: CreateUserInput.inputFields, name: inputFieldName })
         expect(nameInputField.metadata).to.eql(defaultMetadata)
       }
+
+      expect(MyEnum.metadata).to.eql(defaultMetadata)
+      expect(findField({ fields: MyEnum.enumValues, name: 'ONE' }).metadata).to.not.be.ok
+      expect(findField({ fields: MyEnum.enumValues, name: 'TWO' }).metadata).to.eql(defaultMetadata)
+      expect(findField({ fields: MyEnum.enumValues, name: 'THREE' }).metadata).to.not.be.ok
+
+      expect(MyInterface.metadata).to.eql(defaultMetadata)
+      expect(findField({ fields: MyInterface.fields, name: 'id' }).metadata).to.eql(defaultMetadata)
+      expect(findField({ fields: MyInterface.fields, name: 'foo' }).metadata).to.not.be.ok
     })
 
     describe('metadata target key overridden', function () {

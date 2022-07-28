@@ -36,6 +36,17 @@ type Mutation {
     myArg: String
   ): String
 }
+
+interface MyInterface {
+  id: ID
+}
+
+enum MyEnum {
+  ONE
+  TWO
+  THREE
+}
+
 ```
 
 When instantiating `ApolloServer`, pass the following options:
@@ -114,7 +125,11 @@ const schemaMetadataByKind = {
   // Metadata for things of the kind "ENUM"
   ENUM: {
     ...
-  }
+  },
+  // Metadata for things of the kind "INTERFACE"
+  INTERFACE: {
+    ...
+  },
 }
 
 // If you want to only add this metadata in the Development
