@@ -56,7 +56,7 @@ const schemaSDL = `
 const schema = buildSchema(schemaSDL)
 
 function generateIntrospectionQueryResponse () {
-  return graphqlSync(schema, getIntrospectionQuery())
+  return graphqlSync({ schema, source: getIntrospectionQuery() })
 }
 
 function generateMetadata ({

@@ -8,15 +8,6 @@
     "url": "https://github.com/anvilco/apollo-server-plugin-introspection-metadata/issues"
   },
   "homepage": "https://github.com/anvilco/apollo-server-plugin-introspection-metadata#readme",
-  "main": "dist/index.js",
-  "scripts": {
-    "build": "./node_modules/.bin/babel src --out-dir dist",
-    "prepare": "yarn build",
-    "test": "mocha --config ./test/mocha-config.js",
-    "test:debug": "yarn test --node-option inspect=0.0.0.0:9223",
-    "test:watch": "nodemon -x 'yarn test'",
-    "test:debug:watch": "nodemon -x 'yarn test:debug'"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/anvilco/apollo-server-plugin-introspection-metadata.git"
@@ -30,6 +21,16 @@
   ],
   "engines": {
     "node": ">=14"
+  },
+  "main": "dist/index.js",
+  "scripts": {
+    "clean": "rimraf dist/",
+    "build": "./node_modules/.bin/babel src --out-dir dist",
+    "prepare": "yarn build",
+    "test": "mocha --config ./test/mocha-config.js",
+    "test:debug": "yarn test --node-option inspect=0.0.0.0:9223",
+    "test:watch": "nodemon -x 'yarn test'",
+    "test:debug:watch": "nodemon -x 'yarn test:debug'"
   },
   "dependencies": {
     "lodash.get": "^4.4.2",
@@ -45,8 +46,9 @@
     "chai": "^4.3.4",
     "eslint": "^8.10.0",
     "eslint-plugin-mocha": "10",
-    "graphql": "^15.5.3",
+    "graphql": "^16.6.0",
     "mocha": "^10.2.0",
-    "nodemon": "^2.0.20"
+    "nodemon": "^2.0.20",
+    "rimraf": "^3.0.2"
   }
 }
