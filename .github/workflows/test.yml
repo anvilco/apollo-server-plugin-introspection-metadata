@@ -34,9 +34,8 @@ jobs:
         path: dist/
         key: ${{ runner.os }}-node-${{ steps.setup-node.outputs.node-version }}-${{ env.GITHUB_SHA }}
 
-    - name: Build dist
-      run: yarn install
-      run: yarn build
+    - run: yarn install
+    - run: yarn build
 
   test:
     needs: build-and-cache-dist
