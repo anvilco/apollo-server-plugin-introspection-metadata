@@ -2,3 +2,4 @@
 
 - Drop support for Node `< 14`
 - Add support for Node `18`
+- Dependency updates

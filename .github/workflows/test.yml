@@ -15,7 +15,7 @@ env:
 jobs:
 
   build-and-cache-dist:
-    name: Build and Cache ist
+    name: Build and Cache dist
     runs-on: ubuntu-latest
 
     steps:
