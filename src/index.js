@@ -1,7 +1,7 @@
 import set from 'lodash.set'
 import get from 'lodash.get'
 
-const REGEX_INTROSPECTION_QUERY = /\b(__schema|__type)\b/
+export const REGEX_INTROSPECTION_QUERY = /\b(__schema|__type)\b/
 
 const KIND_OBJECT = 'OBJECT'
 const KIND_INPUT_OBJECT = 'INPUT_OBJECT'
@@ -22,7 +22,7 @@ const KIND_TO_FIELDS_KEY = {
 
 
 // Default test function. Will look to see if it is an Introspection Query
-function defaultTestFn (context) {
+export function isIntrospectionQuery (context) {
   return typeof context?.request?.query === 'string' && REGEX_INTROSPECTION_QUERY.test(context.request.query)
 }
 
@@ -51,7 +51,7 @@ function defaultTestFn (context) {
  *   and can be added to the plugins of an Apollo Server instance.
  */
 export const generateApolloPlugin = ({
-  testFn = defaultTestFn,
+  testFn = isIntrospectionQuery,
   schemaMetadata,
   metadataSourceKey = 'metadata',
   metadataTargetKey = 'metadata',

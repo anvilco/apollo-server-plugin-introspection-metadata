@@ -207,6 +207,30 @@ describe('src/index.js', function () {
           })
         })
       })
+
+      context('a custom testFn is supplied', function () {
+        it('works', function () {
+          // Test both the default and named exports
+          [generateApolloPlugin, generateApolloPluginExport].forEach((fn) => {
+
+            const objectOne = fn({
+              testFn: (strang) => strang === 'foo'
+            })
+            expect(objectOne).to.be.ok
+
+            const { requestDidStart } = objectOne
+            expect(requestDidStart).to.be.a('function')
+
+            let objectTwo = requestDidStart('not foo')
+            expect(objectTwo).to.be.undefined
+
+            objectTwo = requestDidStart('foo')
+            expect(objectTwo).to.be.ok
+            const { willSendResponse } = objectTwo
+            expect(willSendResponse).to.be.a('function')
+          })
+        })
+      })
     })
   })
 
