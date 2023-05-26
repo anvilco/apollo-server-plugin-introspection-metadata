@@ -227,6 +227,13 @@ This is what you most likely came here for. See Javadoc in [index.js](src/index.
 #### `addMetadata`
 If you're not actually using Apollo Server, or want to augment an Introspection Query response from somewhere else with your metadata, then this function may be what you're looking for. See Javadoc in [index.js](src/index.js)
 
+
+#### `isIntrospectionQuery`
+A function that takes the Apollo context as an argument and returns a Boolean indicating whether it appears to be an Introspection Query or not. Useful if you're considering implementing your own `testFn` to provide to the `generateApolloPlugin` call.
+
+### `REGEX_INTROSPECTION_QUERY`
+A Javascript RegEx that can be used to test a query string to determine if it's an Introspection Query or not.
+
 ## References
 
 Inspired from [@cleartax/apollo-server-plugin-introspection-auth](https://github.com/cleartax/apollo-server-plugin-introspection-auth).
