@@ -1,3 +1,7 @@
+### 2.1.0
+
+- Added `REGEX_INTROSPECTION_QUERY` and `isIntrospectionQuery` as exports.
+
 ### 2.0.1
 
 - Dependency updates
