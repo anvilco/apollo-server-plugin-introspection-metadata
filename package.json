@@ -1,6 +1,6 @@
 {
   "name": "@anvilco/apollo-server-plugin-introspection-metadata",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "A plugin for Apollo Server that allows for adding metadata to GraphQL Introspection Query responses.",
   "author": "Anvil Foundry Inc. <hello@useanvil.com>",
   "license": "MIT",
@@ -27,9 +27,10 @@
     "clean": "rimraf dist/",
     "build": "./node_modules/.bin/babel src --out-dir dist",
     "prepare": "yarn build",
+    "build:test": "yarn build && yarn test",
     "test": "mocha --config ./test/mocha-config.js",
     "test:debug": "yarn test --node-option inspect=0.0.0.0:9223",
-    "test:watch": "nodemon -x 'yarn test'",
+    "test:watch": "nodemon -x 'yarn build:test'",
     "test:debug:watch": "nodemon -x 'yarn test:debug'"
   },
   "dependencies": {
