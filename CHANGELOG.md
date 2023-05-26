@@ -1,3 +1,7 @@
+### 2.2.0
+
+- `testFn` can be `async`
+
 ### 2.1.0
 
 - Added `REGEX_INTROSPECTION_QUERY` and `isIntrospectionQuery` as exports.

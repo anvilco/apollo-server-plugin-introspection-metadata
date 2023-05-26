@@ -174,7 +174,7 @@ describe('src/index.js', function () {
 
         it('returns nothing', function () {
           // Test both the default and named exports
-          [generateApolloPlugin, generateApolloPluginExport].forEach((fn) => {
+          [generateApolloPlugin, generateApolloPluginExport].forEach(async (fn) => {
 
             const objectOne = fn()
             expect(objectOne).to.be.ok
@@ -182,7 +182,7 @@ describe('src/index.js', function () {
             const { requestDidStart } = objectOne
             expect(requestDidStart).to.be.a('function')
 
-            const objectTwo = requestDidStart($.context)
+            const objectTwo = await requestDidStart($.context)
             expect(objectTwo).to.be.undefined
           })
         })
@@ -192,14 +192,14 @@ describe('src/index.js', function () {
         def('query', () => $.introspectionQueryPattern)
         it('returns object that will call addMetadata function', function () {
           // Test both the default and named exports
-          [generateApolloPlugin, generateApolloPluginExport].forEach((fn) => {
+          [generateApolloPlugin, generateApolloPluginExport].forEach(async (fn) => {
             const objectOne = fn()
             expect(objectOne).to.be.ok
 
             const { requestDidStart } = objectOne
             expect(requestDidStart).to.be.a('function')
 
-            const objectTwo = requestDidStart($.context)
+            const objectTwo = await requestDidStart($.context)
             expect(objectTwo).to.be.ok
 
             const { willSendResponse } = objectTwo
@@ -211,7 +211,7 @@ describe('src/index.js', function () {
       context('a custom testFn is supplied', function () {
         it('works', function () {
           // Test both the default and named exports
-          [generateApolloPlugin, generateApolloPluginExport].forEach((fn) => {
+          [generateApolloPlugin, generateApolloPluginExport].forEach(async (fn) => {
 
             const objectOne = fn({
               testFn: (strang) => strang === 'foo'
@@ -221,10 +221,10 @@ describe('src/index.js', function () {
             const { requestDidStart } = objectOne
             expect(requestDidStart).to.be.a('function')
 
-            let objectTwo = requestDidStart('not foo')
+            let objectTwo = await requestDidStart('not foo')
             expect(objectTwo).to.be.undefined
 
-            objectTwo = requestDidStart('foo')
+            objectTwo = await requestDidStart('foo')
             expect(objectTwo).to.be.ok
             const { willSendResponse } = objectTwo
             expect(willSendResponse).to.be.a('function')

@@ -58,9 +58,9 @@ export const generateApolloPlugin = ({
 } = {}) => {
   return {
     // Check at the beginning of the request whether we should do anything at all
-    requestDidStart (context) {
+    async requestDidStart (context) {
       // If this request doesn't match what we're looking for (an Introspection Query), then do nothing.
-      if (!testFn(context)) {
+      if (!await testFn(context)) {
         return
       }
 
