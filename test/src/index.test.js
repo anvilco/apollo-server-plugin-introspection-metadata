@@ -8,17 +8,6 @@ import rewire from 'rewire'
 
 const Everything = rewire('dist')
 
-console.log({
-  Everything,
-})
-// import * as Everything from 'dist'
-
-// import generateApolloPlugin, {
-//   addMetadata,
-//   generateApolloPlugin as generateApolloPluginExport
-// } from 'dist'
-
-
 const KIND_OBJECT = 'OBJECT'
 // const KIND_INPUT_OBJECT = 'INPUT_OBJECT'
 const KIND_ENUM = 'ENUM'
@@ -163,6 +152,7 @@ function findArg ({ args, name = 'myArg' }) {
 }
 
 describe('src/index.js', function () {
+  // eslint-disable-next-line init-declarations
   let restores
 
   beforeEach(function () {
