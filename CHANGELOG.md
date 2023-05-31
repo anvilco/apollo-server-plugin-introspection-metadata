@@ -1,3 +1,7 @@
+### 2.2.1
+
+- `testFn` can be `async`, but `requestDidStart` cannot be.
+
 ### 2.2.0
 
 - `testFn` can be `async`

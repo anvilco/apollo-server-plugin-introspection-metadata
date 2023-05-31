@@ -11,6 +11,7 @@ module.exports = {
     'mocha/no-exclusive-tests': 'error',
   },
   globals: {
+    sinon: 'readonly',
     expect: 'readonly',
     // *************************************************
     // bdd-lazy-var

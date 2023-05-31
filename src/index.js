@@ -58,15 +58,24 @@ export const generateApolloPlugin = ({
 } = {}) => {
   return {
     // Check at the beginning of the request whether we should do anything at all
-    async requestDidStart (context) {
+    requestDidStart (context) {
+      const testResult = testFn(context)
       // If this request doesn't match what we're looking for (an Introspection Query), then do nothing.
-      if (!await testFn(context)) {
+      if (!testResult) {
         return
       }
 
       return {
         // Hook into the response event
-        willSendResponse (context) {
+        async willSendResponse (context) {
+          // Is it a promise? Then we can finally await it here. Can't await it
+          // in requestDidStart
+          if (typeof testResult.then === 'function') {
+            if (!(await testResult)) {
+              return
+            }
+          }
+
           const {
             response: introspectionQueryResponse,
           } = context
