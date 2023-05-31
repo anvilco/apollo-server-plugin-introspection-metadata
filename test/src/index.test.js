@@ -4,11 +4,9 @@ import {
   graphqlSync,
 } from 'graphql'
 
-import generateApolloPlugin, {
-  addMetadata,
-  generateApolloPlugin as generateApolloPluginExport
-} from 'dist'
+import rewire from 'rewire'
 
+const Everything = rewire('dist')
 
 const KIND_OBJECT = 'OBJECT'
 // const KIND_INPUT_OBJECT = 'INPUT_OBJECT'
@@ -154,6 +152,18 @@ function findArg ({ args, name = 'myArg' }) {
 }
 
 describe('src/index.js', function () {
+  // eslint-disable-next-line init-declarations
+  let restores
+
+  beforeEach(function () {
+    restores = []
+  })
+
+  afterEach(function () {
+    restores.forEach((fn) => fn())
+    sinon.restore()
+  })
+
   describe('generateApolloPlugin', function() {
     def('introspectionQueryPattern', () => '__schema')
     def('otherQueryPattern', () => 'foo')
@@ -174,7 +184,7 @@ describe('src/index.js', function () {
 
         it('returns nothing', function () {
           // Test both the default and named exports
-          [generateApolloPlugin, generateApolloPluginExport].forEach(async (fn) => {
+          [Everything.generateApolloPlugin, Everything.default].forEach((fn) => {
 
             const objectOne = fn()
             expect(objectOne).to.be.ok
@@ -182,7 +192,7 @@ describe('src/index.js', function () {
             const { requestDidStart } = objectOne
             expect(requestDidStart).to.be.a('function')
 
-            const objectTwo = await requestDidStart($.context)
+            const objectTwo = requestDidStart($.context)
             expect(objectTwo).to.be.undefined
           })
         })
@@ -192,14 +202,14 @@ describe('src/index.js', function () {
         def('query', () => $.introspectionQueryPattern)
         it('returns object that will call addMetadata function', function () {
           // Test both the default and named exports
-          [generateApolloPlugin, generateApolloPluginExport].forEach(async (fn) => {
+          [Everything.generateApolloPlugin, Everything.default].forEach((fn) => {
             const objectOne = fn()
             expect(objectOne).to.be.ok
 
             const { requestDidStart } = objectOne
             expect(requestDidStart).to.be.a('function')
 
-            const objectTwo = await requestDidStart($.context)
+            const objectTwo = requestDidStart($.context)
             expect(objectTwo).to.be.ok
 
             const { willSendResponse } = objectTwo
@@ -211,7 +221,9 @@ describe('src/index.js', function () {
       context('a custom testFn is supplied', function () {
         it('works', function () {
           // Test both the default and named exports
-          [generateApolloPlugin, generateApolloPluginExport].forEach(async (fn) => {
+          [Everything.generateApolloPlugin, Everything.default].forEach((fn) => {
+            const addMetadata = sinon.fake()
+            restores.push(Everything.__set__('addMetadata', addMetadata))
 
             const objectOne = fn({
               testFn: (strang) => strang === 'foo'
@@ -221,14 +233,60 @@ describe('src/index.js', function () {
             const { requestDidStart } = objectOne
             expect(requestDidStart).to.be.a('function')
 
-            let objectTwo = await requestDidStart('not foo')
+            let objectTwo = requestDidStart('not foo')
             expect(objectTwo).to.be.undefined
 
-            objectTwo = await requestDidStart('foo')
+            objectTwo = requestDidStart('foo')
             expect(objectTwo).to.be.ok
             const { willSendResponse } = objectTwo
             expect(willSendResponse).to.be.a('function')
+
+            expect(addMetadata).to.not.have.been.called
           })
+        })
+
+        it('works when testFn is async', async function () {
+          // Test both the default and named exports
+          for (const fn of [
+            Everything.generateApolloPlugin,
+            Everything.default
+          ]) {
+            const addMetadata = sinon.fake()
+            restores.push(Everything.__set__('addMetadata', addMetadata))
+
+            const objectOne = fn({
+              testFn: (strang) => new Promise((resolve) => {
+                resolve(strang === 'foo')
+              }),
+            })
+            expect(objectOne).to.be.ok
+
+            const { requestDidStart } = objectOne
+            expect(requestDidStart).to.be.a('function')
+
+            let objectTwo = requestDidStart('not foo')
+            expect(objectTwo).to.be.ok
+
+            let { willSendResponse } = objectTwo
+            expect(willSendResponse).to.be.a('function')
+
+            expect(addMetadata).to.not.have.been.called
+
+            // eslint-disable-next-line no-await-in-loop
+            let resolution = await willSendResponse({})
+            expect(resolution).to.be.undefined
+            // Not called with 'not foo'
+            expect(addMetadata).to.not.have.been.called
+
+            objectTwo = requestDidStart('foo')
+            expect(objectTwo).to.be.ok;
+            ({ willSendResponse } = objectTwo)
+            expect(willSendResponse).to.be.a('function')
+            expect(addMetadata).to.not.have.been.called
+            // eslint-disable-next-line no-await-in-loop
+            resolution = await willSendResponse({})
+            expect(addMetadata).to.have.been.calledOnce
+          }
         })
       })
     })
@@ -245,7 +303,7 @@ describe('src/index.js', function () {
     }))
 
     it('adds metadata using default keys', function () {
-      const response = addMetadata($.params)
+      const response = Everything.addMetadata($.params)
       expect(response).to.be.ok
       const { types } = response.data.__schema
 
@@ -305,7 +363,7 @@ describe('src/index.js', function () {
         def('metadataTargetKey', () => 'metameta')
 
         it('adds metadata to custom key', function () {
-          const response = addMetadata($.params)
+          const response = Everything.addMetadata($.params)
           expect(response).to.be.ok
           const { types } = response.data.__schema
 
@@ -318,7 +376,7 @@ describe('src/index.js', function () {
         def('metadataTargetKey', () => 'meta.meta')
 
         it('adds metadata to custom key', function () {
-          const response = addMetadata($.params)
+          const response = Everything.addMetadata($.params)
           expect(response).to.be.ok
           const { types } = response.data.__schema
 
@@ -331,7 +389,7 @@ describe('src/index.js', function () {
         def('metadataTargetKey', () => ['meta', 'meta'])
 
         it('adds metadata to custom key', function () {
-          const response = addMetadata($.params)
+          const response = Everything.addMetadata($.params)
           expect(response).to.be.ok
           const { types } = response.data.__schema
 
@@ -344,7 +402,7 @@ describe('src/index.js', function () {
         def('metadataTargetKey', () => ['meta.meta', 'meta'])
 
         it('adds metadata to custom key', function () {
-          const response = addMetadata($.params)
+          const response = Everything.addMetadata($.params)
           expect(response).to.be.ok
           const { types } = response.data.__schema
 
@@ -360,7 +418,7 @@ describe('src/index.js', function () {
       })
 
       it('adds metadata', function () {
-        const response = addMetadata($.params)
+        const response = Everything.addMetadata($.params)
         expect(response).to.be.ok
         const { types } = response.__schema
 
