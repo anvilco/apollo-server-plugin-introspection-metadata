@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Save the current .npmrc configuration
-cp .npmrc .npmrc.backup
+# Save the current .yarnrc configuration
+cp .yarnrc .yarnrc.backup
 
 # Publish to the first registry
 yarn config set registry https://registry.npmjs.com/
@@ -11,5 +11,5 @@ yarn publish
 yarn config set registry https://npm.pkg.github.com/
 yarn publish
 
-# Restore the original .npmrc configuration
-mv .npmrc.backup .npmrc
+# Restore the original .yarnrc configuration
+mv .yarnrc.backup .yarnrc
