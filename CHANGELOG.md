@@ -1,3 +1,6 @@
+### 2.2.2
+- Dependency updates
+
 ### 2.2.1
 
 - `testFn` can be `async`, but `requestDidStart` cannot be.
