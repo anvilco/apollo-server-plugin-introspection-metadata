@@ -34,8 +34,7 @@
     "test:debug:watch": "nodemon -x 'yarn test:debug'"
   },
   "dependencies": {
-    "lodash.get": "^4.4.2",
-    "lodash.set": "^4.3.2"
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@babel/cli": "^7.17.6",
