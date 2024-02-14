@@ -1,5 +1,5 @@
-import set from 'lodash.set'
-import get from 'lodash.get'
+import set from 'lodash/set'
+import get from 'lodash/get'
 
 export const REGEX_INTROSPECTION_QUERY = /\b(__schema|__type)\b/
 
